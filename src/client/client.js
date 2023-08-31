@@ -64,6 +64,8 @@ export default class Client{
 
     async putKabupatenById(kabupaten){
         const id = kabupaten.id;
+        kabupaten.provinceId = Number.parseInt(kabupaten.provinceId);
+        kabupaten.province= undefined;
         const response = await axios.put(`http://${this._host}/api/v1/kabupaten/${id}`, kabupaten);
         // const response = await fetch(`http://${this._host}/api/v1/provinces`, {mode:"no-cors"});
         return response.data;

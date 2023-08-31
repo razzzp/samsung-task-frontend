@@ -4,6 +4,8 @@ import Client from "@/client/client"
 import { useRouter } from "next/navigation";
 import {ButtonPrimary, ButtonSecondary, FormLabelAndField} from "@/components/form";
 import { buildClient } from "@/client/client";
+import { validateKabupaten } from "../new/page";
+import { useRef } from "react";
 
 function renderKabupaten(kabupaten){
     if(typeof kabupaten === "string"){
@@ -14,14 +16,6 @@ function renderKabupaten(kabupaten){
     } else {
         return <KabupatenForm kabupaten={kabupaten}/>
     }
-}
-function validateKabupaten(kabupaten){
-    const re = /^[a-zA-Z\s]+$/;
-    if(!kabupaten.name || typeof kabupaten.name !== 'string' || !re.test(kabupaten.name)){
-        alert('name should be a string with not numbers/symbols');
-        return false;
-    }
-    return true;
 }
 
 export default function KabupatenEditPage({params}){
@@ -48,10 +42,42 @@ export default function KabupatenEditPage({params}){
     )
 }
 
+export function updateProvinceId(kabupaten, provinceDict){
+    if(!provinceDict) return kabupaten;
+    const id = provinceDict[getProvinceName(kabupaten)];
+    if(!id) throw new Error('province does not exist');
+    kabupaten.provinceId = id;
+    return {...kabupaten};
+}
+
+export async function buildProvinceDict(){
+    const client = buildClient();
+    const provinces = await client.getProvinces();
+    if (!Array.isArray(provinces)) throw new Error('failed to retrieve provinces');
+    const newProvDict = {};
+    provinces.forEach((prov)=>{
+        newProvDict[prov.name] = prov.id;
+    });
+    return newProvDict; 
+}
+
 function KabupatenForm({kabupaten}){
     
     let [curKabupaten, setKabupaten] = useState(kabupaten);
     let router = useRouter();
+    let [provinceDict, setProvinceDict ]= useState();
+    useEffect(()=>{
+        async function getProvinceDict(){
+            try{
+                const newProvDict = await buildProvinceDict();
+                setProvinceDict(newProvDict);
+            } catch(e) {
+                alert(`Error: ${e}`)
+                console.error(e);
+            }   
+        }
+        if (!provinceDict) getProvinceDict();
+    });
     const onFieldChange = (event) => {
         const newKabupaten = {
             ...curKabupaten,
@@ -61,13 +87,16 @@ function KabupatenForm({kabupaten}){
     };
     const onSubmit = async(e)=>{
         e.preventDefault();
-        if (!validateKabupaten(curKabupaten)) return;
+        
         const client = buildClient();
         try{
-            const kabupaten = await client.putKabupatenById(curKabupaten);
-            setKabupaten(kabupaten);
+            let validKabupaten = updateProvinceId(curKabupaten, provinceDict);
+            validKabupaten =  validateKabupaten(curKabupaten);
+            const updatedKabupaten = await client.putKabupatenById(validKabupaten);
+            setKabupaten(updatedKabupaten);
+            router.push(`/kabupaten`);
         } catch(e) {
-            alert('failed to update')
+            alert(`failed to update ${e}`)
             console.error(e);
             router.push(`/kabupaten/${curKabupaten.id}`);
         }
@@ -89,8 +118,7 @@ function KabupatenForm({kabupaten}){
         <form onSubmit={onSubmit} noValidate>
             <div className="w-3/4 text-center">Edit Province</div>
             <div className="flex flex-col w-full gap-y-4">
-                <FormLabelAndField label="Id" name="id" value={curKabupaten.id} type="text" onFieldChange={onFieldChange} disabled={true}/>
-                <FormLabelAndField label="Name" name="name" value={curKabupaten.name} type="text" onFieldChange={onFieldChange}/>
+                <KabupatenFormFields kabupaten={curKabupaten} provinceDict={provinceDict}  onChange={onFieldChange}/>
                 {/* <ButtonGroup aria-label="Basic example">
                     <Button type="submit" variant="secondary">Save</Button>
                     <Button type="button" variant="secondary">Cancel</Button>
@@ -102,5 +130,42 @@ function KabupatenForm({kabupaten}){
                 </div>
             </div>
         </form>
+    )
+}
+
+export function getProvinceName(kabupaten){
+    let prov;
+    if(typeof kabupaten.province === 'string'){
+        prov = kabupaten.province;
+    } else {
+        prov = kabupaten.province.name;
+    }
+    return prov;
+}
+
+export function KabupatenFormFields({kabupaten, provinceDict, onChange}) {
+    return (
+        <>
+        {
+            kabupaten.id?
+                <FormLabelAndField label="Id" name="id" value={kabupaten.id} type="text" onFieldChange={onChange} disabled={true}/>
+                : ""
+
+        }
+        <FormLabelAndField label="Name" name="name" value={kabupaten.name} type="text" onFieldChange={onChange}/>
+        <FormLabelAndField label={"Province"} name="province" value={getProvinceName(kabupaten)} type="text" list="provinces" onFieldChange={onChange} />
+            <datalist id="provinces">
+                {
+                    provinceDict ?
+                    Object.entries(provinceDict).map(([province, id])=>{
+                        return (<option key={id} value={province}></option>)
+                    }) : ""
+                }
+            </datalist>
+        {/* <ButtonGroup aria-label="Basic example">
+            <Button type="submit" variant="secondary">Save</Button>
+            <Button type="button" variant="secondary">Cancel</Button>
+        </ButtonGroup> */}
+        </>
     )
 }

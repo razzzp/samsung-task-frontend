@@ -3,6 +3,8 @@ import Client from "@/client/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { buildClient } from "@/client/client";
+import { ButtonPrimary } from "@/components/form";
+import { useRouter } from "next/navigation";
 
 function renderKabupaten(provinces){
     if(!provinces){
@@ -18,6 +20,11 @@ function renderKabupaten(provinces){
 
 export default function KabupatenTablePage({params}){
     let [kabupatens, setKabupatens] = useState();
+    const router = useRouter();
+    const create = () =>{
+        router.push('/kabupaten/new');
+    };
+
     useEffect(()=>{
         async function fetchKabupatens(){
             const client = buildClient();
@@ -32,7 +39,14 @@ export default function KabupatenTablePage({params}){
     })
     return (
         <main className="flex w-full justify-center">
-            {renderKabupaten(kabupatens)}
+            <div className="w-3/4 flex flex-col gap-y-2">
+                <div className="w-full">
+                    <ButtonPrimary onClick={create}>New</ButtonPrimary>
+                </div>
+                <div className="w-full">
+                    {renderKabupaten(kabupatens)}
+                </div>
+            </div>
         </main>
     );
 }

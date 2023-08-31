@@ -4,6 +4,7 @@ import { ButtonPrimary } from "@/components/form";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { buildClient } from "@/client/client";
+import { useRouter } from "next/navigation";
 
 function renderProvinces(provinces){
     if(!provinces){
@@ -19,9 +20,9 @@ function renderProvinces(provinces){
 
 export default function ProvinceTablePage(){
     let [provinces, setProvinces] = useState();
-
+    const router = useRouter();
     const create = () =>{
-        const client = buildClient();
+        router.push('/propinsi/new');
     };
 
     useEffect(()=>{

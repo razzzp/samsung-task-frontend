@@ -4,6 +4,7 @@ import Client from "@/client/client"
 import { useRouter } from "next/navigation";
 import {ButtonPrimary, ButtonSecondary, FormLabelAndField} from "@/components/form";
 import { buildClient } from "@/client/client";
+import { validateProvince } from "../new/page";
 
 function renderProvince(province){
     if(typeof province === "string"){
@@ -12,16 +13,8 @@ function renderProvince(province){
     else if(!province){
         return "Loading..."
     } else {
-        return <ProvinceForm province={province}/>
+        return <ProvinceEditForm province={province}/>
     }
-}
-function validateProvince(province){
-    const re = /^[a-zA-Z\s]+$/;
-    if(!province.name || typeof province.name !== 'string' || !re.test(province.name)){
-        alert('name should be a string with not numbers/symbols');
-        return false;
-    }
-    return true;
 }
 
 export default function ProvinceEditPage({params}){
@@ -48,7 +41,7 @@ export default function ProvinceEditPage({params}){
     )
 }
 
-export function ProvinceForm({province}){
+export function ProvinceEditForm({province}){
     
     let [curProvince, setProvince] = useState(province);
     let router = useRouter();
@@ -66,6 +59,7 @@ export function ProvinceForm({province}){
         try{
             const province = await client.putProvinceById(curProvince);
             setProvince(province);
+            router.push(`/propinsi`);
         } catch(e) {
             alert('failed to update')
             console.error(e);
@@ -87,17 +81,9 @@ export function ProvinceForm({province}){
     }
     return(
         <form onSubmit={onSubmit} noValidate>
-            <div className="w-fulltext-center">Edit Province</div>
+            <div className="w-full text-center">Edit Province</div>
             <div className="flex flex-col w-full gap-y-4">
-                { curProvince.id ? 
-                    <FormLabelAndField label="Id" name="id" value={curProvince.id} type="text" onFieldChange={onFieldChange} disabled={true}/>
-                    : ""
-                }
-                <FormLabelAndField label="Name" name="name" value={curProvince.name} type="text" onFieldChange={onFieldChange}/>
-                {/* <ButtonGroup aria-label="Basic example">
-                    <Button type="submit" variant="secondary">Save</Button>
-                    <Button type="button" variant="secondary">Cancel</Button>
-                </ButtonGroup> */}
+                <ProvinceFormFields province={curProvince} onChange={onFieldChange}/>
                 <div className="flex flex-row justify-end space-x-6">
                     <ButtonPrimary type="submit">Save</ButtonPrimary>
                     <ButtonSecondary type="button" onClick={cancel}>Cancel</ButtonSecondary>
@@ -110,8 +96,8 @@ export function ProvinceForm({province}){
 
 export function ProvinceFormFields({province, onChange}){
     return(
-        <div className="flex flex-col w-full gap-y-4">
-            { curProvince.id ? 
+        <>
+            { province.id ? 
                 <FormLabelAndField label="Id" name="id" value={province.id} type="text" onFieldChange={onChange} disabled={true}/>
                 : ""
             }
@@ -120,11 +106,6 @@ export function ProvinceFormFields({province, onChange}){
                 <Button type="submit" variant="secondary">Save</Button>
                 <Button type="button" variant="secondary">Cancel</Button>
             </ButtonGroup> */}
-            <div className="flex flex-row justify-end space-x-6">
-                <ButtonPrimary type="submit">Save</ButtonPrimary>
-                <ButtonSecondary type="button" onClick={cancel}>Cancel</ButtonSecondary>
-                <ButtonSecondary type="button" onClick={deleteObject}>Delete</ButtonSecondary>
-            </div>
-        </div>
+        </> 
     )
 }
