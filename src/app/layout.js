@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import { NavBar, NavItem } from './navigation'
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,7 @@ export default function RootLayout({ children }) {
           <h1 className="text-xl font-sans font-bold font">.ID</h1>
         </Header>
       </div>
-      <div className="container flex flex-row h-screen">
+      <div className="flex flex-row w-full h-screen">
         <div className='w-48'>
           <NavBar>
             <NavItem link={'/propinsi'}>Propinsi</NavItem>

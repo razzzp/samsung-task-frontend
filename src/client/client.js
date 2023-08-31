@@ -14,4 +14,17 @@ export default class Client{
         // const response = await fetch(`http://${this._host}/api/v1/provinces`, {mode:"no-cors"});
         return response.data;
     }
+
+    async getProvinceById(id){
+        const response = await axios.get(`http://${this._host}/api/v1/provinces/${id}`);
+        // const response = await fetch(`http://${this._host}/api/v1/provinces`, {mode:"no-cors"});
+        return response.data;
+    }
+
+    async putProvinceById(province){
+        const id = province.id;
+        const response = await axios.put(`http://${this._host}/api/v1/provinces/${id}`, province);
+        // const response = await fetch(`http://${this._host}/api/v1/provinces`, {mode:"no-cors"});
+        return response.data;
+    }
 }

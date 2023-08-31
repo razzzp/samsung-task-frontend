@@ -15,7 +15,7 @@ function renderProvinces(provinces){
     }
 }
 
-export default function ProvincePage(){
+export default function ProvinceTablePage(){
     let [provinces, setProvinces] = useState();
     useEffect(()=>{
         async function fetchProvinces(){
@@ -30,7 +30,7 @@ export default function ProvincePage(){
         if(!provinces) fetchProvinces();
     })
     return (
-        <main>
+        <main className="flex w-full justify-center">
             {renderProvinces(provinces)}
         </main>
     );
@@ -39,19 +39,20 @@ export default function ProvincePage(){
 function Table({data, headers}){
     console.log('heres')
     return (
-        <table>
-            <tr>
-                {headers.map((val,i)=>{
-                    return(
-                        <th key={i}>{val}</th>
-                    )
-                })}
+        <table className="border border-slate-500 border-collapse bg-slate-700 w-3/4">
+            <colgroup>
+                <col span={1} className="w-1/4"/>
+                <col span={1} className="w-3/4"/>
+            </colgroup>
+            <tr className="bg-slate-800">
+                <th className="py-3 border-y border-slate-500" key={1}>Id</th>
+                <th className="text-left border-y border-slate-500" key={2}>Nama Propinsi</th>
             </tr>
             {data.map((item)=>{
                 return (
                     <tr key={item.id} className="hover:bg-neutral-800">
-                        <td>{item.id}</td>
-                        <td>
+                        <td className="py-2 text-center border-y border-slate-500">{item.id}</td>
+                        <td className="border-y  border-slate-500">
                             <Link className="block" href={`/propinsi/${item.id}`} key={item.id}>
                                 {item.name}
                             </Link>
