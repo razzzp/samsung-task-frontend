@@ -1,14 +1,16 @@
 "use client"
 import Client from "@/client/client";
+import { ButtonPrimary } from "@/components/form";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { buildClient } from "@/client/client";
 
 function renderProvinces(provinces){
     if(!provinces){
         return "Loading..."
     } else {
         if(Array.isArray(provinces)){
-            return <Table data={provinces} headers={['Id', 'Nama Propinsi']}></Table>
+            return <ProvinceTable data={provinces} headers={['Id', 'Nama Propinsi']}></ProvinceTable>
         } else {
             return "Error loading provinces"
         }
@@ -17,9 +19,14 @@ function renderProvinces(provinces){
 
 export default function ProvinceTablePage(){
     let [provinces, setProvinces] = useState();
+
+    const create = () =>{
+        const client = buildClient();
+    };
+
     useEffect(()=>{
         async function fetchProvinces(){
-            const client = new Client('localhost:5000');
+            const client = buildClient();
             try{
                 const provinces = await client.getProvinces();
                 setProvinces(provinces);
@@ -31,26 +38,32 @@ export default function ProvinceTablePage(){
     })
     return (
         <main className="flex w-full justify-center">
-            {renderProvinces(provinces)}
+            <div className="w-3/4 flex flex-col gap-y-2">
+                <div className="w-full">
+                    <ButtonPrimary onClick={create}>New</ButtonPrimary>
+                </div>
+                <div className="w-full">
+                    {renderProvinces(provinces)}
+                </div>
+            </div>
         </main>
     );
 }
 
-function Table({data, headers}){
-    console.log('heres')
+function ProvinceTable({data, headers}){
     return (
-        <table className="border border-slate-500 border-collapse bg-slate-700 w-3/4">
+        <table className="border border-neutral-500 border-collapse bg-neutral-600 w-full rounded-md">
             <colgroup>
                 <col span={1} className="w-1/4"/>
                 <col span={1} className="w-3/4"/>
             </colgroup>
-            <tr className="bg-slate-800">
+            <tr className="bg-neutral-800">
                 <th className="py-3 border-y border-slate-500" key={1}>Id</th>
-                <th className="text-left border-y border-slate-500" key={2}>Nama Propinsi</th>
+                <th className="text-left border-y border-slate-500" key={2}>Propinsi</th>
             </tr>
             {data.map((item)=>{
                 return (
-                    <tr key={item.id} className="hover:bg-neutral-800">
+                    <tr key={item.id} className="hover:bg-neutral-700">
                         <td className="py-2 text-center border-y border-slate-500">{item.id}</td>
                         <td className="border-y  border-slate-500">
                             <Link className="block" href={`/propinsi/${item.id}`} key={item.id}>
